@@ -1,0 +1,60 @@
+version: '3.8'
+services:
+  mysql-db:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ecommerce
+      MYSQL_USER: rout
+      MYSQL_PASSWORD: Laliayou19
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+  redis-cache:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+
+  common-data-service:
+    build: ./common-data-service
+    ports:
+      - "8081:8081"
+    depends_on:
+      - mysql-db
+      - redis-cache
+
+  authentication-service:
+    build: ./authentication-service
+    ports:
+      - "8082:8082"
+    depends_on:
+      - mysql-db
+
+  payment-service:
+    build: ./payment-service
+    ports:
+      - "8083:8083"
+    depends_on:
+      - mysql-db
+
+  search-suggestion-service:
+    build: ./search-suggestion-service
+    ports:
+      - "8084:8084"
+    depends_on:
+      - redis-cache
+
+  react-ui:
+    build: ./react-ui
+    ports:
+      - "3000:3000"
+    depends_on:
+      - common-data-service
+      - authentication-service
+      - payment-service
+      - search-suggestion-service
+
+volumes:
+  mysql-data:
