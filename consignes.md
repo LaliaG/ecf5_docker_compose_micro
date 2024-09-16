@@ -1,0 +1,1 @@
+Pour l'ECF : Il faut faire en sorte que le projet sur git soit opérationnel dans des containers. Prenez le temps de bien comprendre le projet. Ensuite faire les dockerfile pour chacun des microservices et aussi pour les containers qui vont être utilisés pour la persistance. Enfin créer un docker-compose qui va vous permettre de faire fonctionner le tout ensemble. 
