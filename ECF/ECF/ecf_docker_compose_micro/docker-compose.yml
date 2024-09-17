@@ -1,60 +1,75 @@
 version: '3.8'
+
 services:
   mysql-db:
-    image: mysql:8
+    image: mysql:8.0
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: ecommerce
-      MYSQL_USER: rout
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: ecommerce_db
+      MYSQL_USER: root
       MYSQL_PASSWORD: Laliayou19
     ports:
       - "3306:3306"
     volumes:
       - mysql-data:/var/lib/mysql
+    networks:
+      - ecommerce-network
 
   redis-cache:
     image: redis:alpine
     ports:
       - "6379:6379"
+    networks:
+      - ecommerce-network
 
   common-data-service:
     build: ./common-data-service
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
     ports:
-      - "8081:8081"
+      - "8081:8080"  # Maps external port 8081 to internal 8080
     depends_on:
       - mysql-db
       - redis-cache
+    networks:
+      - ecommerce-network
 
   authentication-service:
     build: ./authentication-service
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
     ports:
-      - "8082:8082"
+      - "8082:8080"  # Maps external port 8082 to internal 8080
     depends_on:
       - mysql-db
-
-  payment-service:
-    build: ./payment-service
-    ports:
-      - "8083:8083"
-    depends_on:
-      - mysql-db
+      - redis-cache
+    networks:
+      - ecommerce-network
 
   search-suggestion-service:
     build: ./search-suggestion-service
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
     ports:
-      - "8084:8084"
+      - "8083:8080"  # Maps external port 8083 to internal 8080
     depends_on:
       - redis-cache
+    networks:
+      - ecommerce-network
 
   react-ui:
     build: ./react-ui
     ports:
-      - "3000:3000"
+      - "3000:3000"  # Maps external port 3000 to internal 3000
     depends_on:
       - common-data-service
       - authentication-service
-      - payment-service
       - search-suggestion-service
+    networks:
+      - ecommerce-network
+
+networks:
+  ecommerce-network:
 
 volumes:
   mysql-data:
