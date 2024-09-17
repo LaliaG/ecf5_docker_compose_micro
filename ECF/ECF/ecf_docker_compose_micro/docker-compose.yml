@@ -1,4 +1,4 @@
-version: '3.9'
+version: '3.8'
 
 services:
   mysql-db:
@@ -24,11 +24,12 @@ services:
 
   common-data-service:
     build:
-      context: ./common-data-service
+      context: /mnt/c/Users/User1/Desktop/ecf5_docker_compose_micro/ECF/ECF/ecf_docker_compose_micro/common-data-service
       dockerfile: Dockerfile
     environment:
       - SPRING_PROFILES_ACTIVE=prod
-    ports:
+      - PORT=8080 
+    ports:  
       - "8081:8080"  # Maps external port 8081 to internal 8080
     depends_on:
       - mysql-db
@@ -38,11 +39,12 @@ services:
 
   authentication-service:
     build: 
-      context: ./authentication-service
+      context: /mnt/c/Users/User1/Desktop/ecf5_docker_compose_micro/ECF/ECF/ecf_docker_compose_micro/authentication-service
       dockerfile: Dockerfile
     
     environment:
       - SPRING_PROFILES_ACTIVE=prod
+      - PORT=8080
     ports:
       - "8082:8080"  # Maps external port 8082 to internal 8080
     depends_on:
@@ -53,10 +55,11 @@ services:
 
   search-suggestion-service:
     build:
-      context: ./search-suggestion-service
+      context: /mnt/c/Users/User1/Desktop/ecf5_docker_compose_micro/ECF/ECF/ecf_docker_compose_micro/search-suggestion-service
       dockerfile: Dockerfile
     environment:
       - SPRING_PROFILES_ACTIVE=prod
+      - PORT=8080
     ports:
       - "8083:8080"  # Maps external port 8083 to internal 8080
     depends_on:
@@ -66,7 +69,7 @@ services:
 
   react-ui:
     build: 
-      context: ./react-ui
+      context: /mnt/c/Users/User1/Desktop/ecf5_docker_compose_micro/ECF/ECF/ecf_docker_compose_micro/react-ui
       dockerfile: Dockerfile
     ports:
       - "3000:3000"  # Maps external port 3000 to internal 3000
