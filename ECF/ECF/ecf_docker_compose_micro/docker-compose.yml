@@ -1,4 +1,4 @@
-version: '3.8'
+version: '3.9'
 
 services:
   mysql-db:
@@ -23,7 +23,9 @@ services:
       - ecommerce-network
 
   common-data-service:
-    build: ./common-data-service
+    build:
+      context: ./common-data-service
+      dockerfile: Dockerfile
     environment:
       - SPRING_PROFILES_ACTIVE=prod
     ports:
@@ -35,7 +37,10 @@ services:
       - ecommerce-network
 
   authentication-service:
-    build: ./authentication-service
+    build: 
+      context: ./authentication-service
+      dockerfile: Dockerfile
+    
     environment:
       - SPRING_PROFILES_ACTIVE=prod
     ports:
@@ -47,7 +52,9 @@ services:
       - ecommerce-network
 
   search-suggestion-service:
-    build: ./search-suggestion-service
+    build:
+      context: ./search-suggestion-service
+      dockerfile: Dockerfile
     environment:
       - SPRING_PROFILES_ACTIVE=prod
     ports:
@@ -58,7 +65,9 @@ services:
       - ecommerce-network
 
   react-ui:
-    build: ./react-ui
+    build: 
+      context: ./react-ui
+      dockerfile: Dockerfile
     ports:
       - "3000:3000"  # Maps external port 3000 to internal 3000
     depends_on:
