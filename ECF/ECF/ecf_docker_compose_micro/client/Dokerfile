@@ -7,7 +7,7 @@ FROM node AS build
 WORKDIR /usr/src/app
 
 # Copy package.json and install dependencies
-COPY package*.json ./
+COPY ./client/package.json ./
 # COPY package-lock.json .
 
 RUN yarn install
@@ -31,8 +31,8 @@ COPY --from=build /usr/src/app/build /usr/share/nginx/html
 EXPOSE 3000
 
 # Start the application using serve (or any other server you prefer)
-#CMD ["npx", "serve", "-s", "build", "-l", "3000"]
-CMD ["nginx","-g","daemon off;"]
+CMD ["npx", "serve", "-s", "build", "-l", "3000"]
+#CMD ["nginx","-g","daemon off;"]
 
 
 

@@ -1,9 +1,9 @@
-version: '3.8'
+#version: '3.8'
 
 services:
   mysql-db:
     container_name: mysql-db
-    image: mysql:8.0 latest
+    image: mysql:latest # version 8.0
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
@@ -11,7 +11,7 @@ services:
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_ROOT_PASSWORD}  #(cf .env)
     ports:
-      - "${DB_PORT}:3306"
+      - ${DB_PORT}:3306
     volumes:
       - mysql-data:/var/lib/mysql
     networks:
@@ -19,12 +19,11 @@ services:
 
   redis-cache:
     container_name: redis-cache
-    image: redis:alpine latest
+    image: redis:alpine
     restart: always
-    environment:
-      command: redis-server --requirepass ${REDIS_PASSWORD} #REDIS_PASSWORD: ${REDIS_PASSWORD}
+    command: redis-server --requirepass ${REDIS_PASSWORD} #REDIS_PASSWORD: ${REDIS_PASSWORD}
     ports:
-      - "${REDIS_PORT}:6379"
+      - ${REDIS_PORT}:6379
     
     networks:
       - ecommerce-network
@@ -39,21 +38,27 @@ services:
       dockerfile: Dockerfile
     
     environment:
-      - SPRING_PROFILES_ACTIVE=${ACTIVE_PROFILE}
-      - PORT=${COMMON_DATA_SERVICE_PORT}:9000  # From .env  PORT=9000
-      - "DB_HOST: ${DB_HOST}"
-      - "DB_PORT: ${DB_PORT}"
-      - "DB_SCHEMA: ${DB_SCHEMA}"
-      - "DB_USER: ${DB_USER}"
-      - "DB_PASS: ${DB_PASS}"
-      - "REDIS_PASSWORD:  ${REDIS_PASSWORD}"
-      - "REDIS_PORT: ${REDIS_PORT}"
+      - ACTIVE_PROFILES= ${ACTIVE_PROFILE}
+      - PORT=${COMMON_DATA_SERVICE_PORT}  # From .env  PORT=9000
+      - DB_HOST=mysql-db
+      - DB_PORT= ${DB_PORT}
+      - DB_SCHEMA= ${DB_SCHEMA}
+      - DB_USER= ${DB_USER}
+      - DB_PASS= ${DB_PASS}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - REDIS_PORT= ${REDIS_PORT}
+      - REDIS_HOST=redis-cache
+      - REACT_CLIENT_URL=${REACT_CLIENT_URL}
+    links:
+      - mysql-db:mysql
+    expose:
+      - ${COMMON_DATA_SERVICE_PORT}  
     ports:  
-      - "${COMMON_DATA_SERVICE_PORT}:${COMMON_DATA_SERVICE_PORT}"  # Maps external port 9000 to internal 8080
+      - ${COMMON_DATA_SERVICE_PORT}:${COMMON_DATA_SERVICE_PORT}  # Maps external port 9000 to internal 8080
     depends_on:
       - mysql-db
       - redis-cache
-      - react-ui
+      - react-app
     networks:
       - ecommerce-network
     restart: always  
@@ -66,88 +71,102 @@ services:
       dockerfile: Dockerfile
     
     environment:
-      - SPRING_PROFILES_ACTIVE=${ACTIVE_PROFILE}
-      - PORT=${AUTHENTICATION_SERVICE_PORT}:7000  # From .env PORT=7000
-      - "DB_HOST: ${DB_HOST}"
-      - "DB_PORT: ${DB_PORT}"
-      - "DB_SCHEMA: ${DB_SCHEMA}"
-      - "DB_USER: ${DB_USER}"
-      - "DB_PASS: ${DB_PASS}"
-      - "REDIS_PASSWORD:  ${REDIS_PASSWORD}"
-      - "REDIS_PORT: ${REDIS_PORT}"
+      - ACTIVE_PROFILES= ${ACTIVE_PROFILE}
+      - PORT= ${AUTHENTICATION_SERVICE_PORT} # From .env PORT=7000
+      - DB_HOST= mysql-db 
+      - DB_PORT= ${DB_PORT}
+      - DB_SCHEMA= ${DB_SCHEMA}
+      - DB_USER= ${DB_USER}
+      - EDIS_PASSWORD=  ${REDIS_PASSWORD}
+      - REDIS_PORT= ${REDIS_PORT}
+    links:
+      - mysql-db:mysql
+    expose:
+      - ${AUTHENTICATION_SERVICE_PORT}    
     ports:
-      - "${AUTHENTICATION_SERVICE_PORT}:${AUTHENTICATION_SERVICE_PORT}" # Maps external port 7000 to internal 8080
+      - ${AUTHENTICATION_SERVICE_PORT}:${AUTHENTICATION_SERVICE_PORT} # Maps external port 7000 to internal 8080
     depends_on:
       - mysql-db
       - redis-cache
-      - react-ui
+      - react-app
     networks:
       - ecommerce-network
 
   search-suggestion-service:
+    container_name: search-suggestion-service
     build:
       context: ./server/search-suggestion-service
       dockerfile: Dockerfile
-    container_name: search-suggestion-service   
+       
     environment:
-      - "ACTIVE_PROFILE: ${ACTIVE_PROFILE}"
-      - "PORT=${SEARCH_SUGGESTION_SERVICE_PORT}:10000"  # From .env  PORT=10000
-      - "DB_HOST: ${DB_HOST}"
-      - "DB_PORT: ${DB_PORT}"
-      - "DB_SCHEMA: ${DB_SCHEMA}"
-      - "DB_USER: ${DB_USER}"
-      - "DB_PASS: ${DB_PASS}"
+      - ACTIVE_PROFILE= ${ACTIVE_PROFILE}
+      - PORT= ${SEARCH_SUGGESTION_SERVICE_PORT}  # From .env  PORT=10000
+      - COMMON_DATA_SERVICE_URL=http://common-data-service:${COMMON_DATA_SERVICE_PORT}
+    expose:
+      - ${SEARCH_SUGGESTION_SERVICE_PORT}  
     ports:
-      - "${SEARCH_SUGGESTION_SERVICE_PORT}:${SEARCH_SUGGESTION_SERVICE_PORT}"  # Maps external port 100000 to internal 8080
+      - ${SEARCH_SUGGESTION_SERVICE_PORT}:${SEARCH_SUGGESTION_SERVICE_PORT}  # Maps external port 100000 to internal 8080
     depends_on:
+      - mysql-db
       - redis-cache
+      - react-app
+      - common-data-service
+      - authentication-service
+      - payment-service
     networks:
       - ecommerce-network
     restart: always  
 
 
   payment-service:
+    container_name: payment-service
     build: 
       context: ./server/payment-service
       dockerfile: Dockerfile
     environment:
-      - "SPRING_PROFILES_ACTIVE: ${ACTIVE_PROFILE}"
-      - "PORT=${PAYMENT_SERVICE_PORT}:9050"  # From .env PORT=9050
-      - "DB_HOST: ${DB_HOST}"
-      - "DB_PORT: ${DB_PORT}"
-      - "DB_SCHEMA: ${DB_SCHEMA}"
-      - "DB_USER: ${DB_USER}"
-      - "DB_PASS: ${DB_PASS}"
+      - ACTIVE_PROFILES= ${ACTIVE_PROFILE}
+      - PORT=${PAYMENT_SERVICE_PORT}  # From .env PORT=9050
+      - DB_HOST=mysql-db 
+      - DB_PORT= ${DB_PORT}
+      - DB_SCHEMA= ${DB_SCHEMA}
+      - DB_USER= ${DB_USER}
+      - DB_PASS= ${DB_PASS}
+    links:
+      - mysql-db:mysql
+    expose:
+      - ${PAYMENT_SERVICE_PORT}  
     ports:
-      - "${PAYMENT_SERVICE_PORT}:${PAYMENT_SERVICE_PORT}"   # Maps external port 9095 to internal 8080
+      - ${PAYMENT_SERVICE_PORT}:${PAYMENT_SERVICE_PORT}   # Maps external port 9095 to internal 8080
     depends_on:
       - mysql-db
+      - redis-cache
+      - react-app
     networks:
       - ecommerce-network
     restart: always  
 
-  react-ui:
+  react-app:
+    container_name: react-app
     build: 
-      context: ./client
+      context: ./client/
       dockerfile: Dockerfile
-    container_name: react-ui-service   
 
+    expose:
+      - ${REACT_APP_PORT}
+     
     ports:
-      - "${REACT_APP_PORT}:${REACT_APP_PORT}:3000"  # Maps external port 3000 to internal 3000
+      - ${REACT_APP_PORT}:${REACT_APP_PORT}  # Maps external port 3000 to internal 3000
     environment:
-      - REACT_CLIENT_URL= ${REACT_CLIENT_URL}
       - REACT_APP_ENVIRONMENT=${REACT_APP_ENVIRONMENT}
-      - REACT_APP_AUTHENTICATION_SERVICE_PORT=${REACT_APP_AUTHENTICATION_SERVICE_PORT}
       - REACT_APP_COMMON_DATA_SERVICE_PORT=${REACT_APP_COMMON_DATA_SERVICE_PORT}
-      - REACT_APP_SEARCH_SUGGESTION_SERVICE_PORT=${REACT_APP_SEARCH_SUGGESTION_SERVICE_PORT}
-      - REACT_APP_AUTHENTICATION_SERVICE_URL=${REACT_APP_AUTHENTICATION_SERVICE_URL}
-      - REACT_APP_COMMON_DATA_SERVICE_URL=${REACT_APP_COMMON_DATA_SERVICE_URL}
-      - REACT_APP_SEARCH_SUGGESTION_SERVICE_URL=${REACT_APP_SEARCH_SUGGESTION_SERVICE_URL}
+    volumes:
+      - ./client:/usr/src/app
+      - /usr/src/app/node_modules
+    
   
     depends_on:
-      - common-data-service
-      - authentication-service
-      - search-suggestion-service
+      - mysql-db
+      - redis-cache
     networks:
       - ecommerce-network
     restart: always  
