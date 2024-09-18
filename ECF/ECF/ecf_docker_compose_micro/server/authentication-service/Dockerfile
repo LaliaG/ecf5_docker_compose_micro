@@ -1,14 +1,41 @@
 # Dockerfile for authentication-service
-FROM openjdk:17-jdk-slim
+# Step 1: Building the app
+FROM  maven:3.9.6-eclipse-temurin-11-alpine AS builder
 
-# Define the working directory
+# Define the working directory for Maven
 WORKDIR /app
 
-# Copy the built application jar (Assume you will build the jar file with Maven/Gradle)
-COPY target/authentication-service.jar app.jar
+# Copies pom.xml files and source files to download dependencies
+COPY pom.xml .
+RUN mvn dependency:go-offline
+COPY src ./src
 
-# Expose the port for the service
-EXPOSE 8082
+# Compile the application by skipping the tests
+RUN mvn package -DskipTests
+
+#Step 2: Runtime Image
+FROM openjdk:11
+
+# Defines the working directory for execution
+WORKDIR /app
+
+# Copy the jar from the build step (Assume you will build the jar file with Maven/Gradle, in the pom file Maven is used) 
+COPY --from=builder /app/target/authentication-service-0.0.1-SNAPSHOT.jar .
+
+# Expose the port (use 7000 as specified in .env)
+EXPOSE 7000
 
 # Run the Spring Boot application
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java","-jar","authentication-service-0.0.1-SNAPSHOT.jar"]
+
+
+
+
+
+
+
+
+
+
+
+
