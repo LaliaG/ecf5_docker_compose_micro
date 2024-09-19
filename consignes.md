@@ -7,7 +7,6 @@ Pour l'ECF : Il faut faire en sorte que le projet sur git soit opérationnel dan
 
 
 ## App Client mysql-db server
-[client](./client/)
 [client](./ECF/ECF/ecf_docker_compose_micro/client/)
 [mysql-db](./ECF/ECF/ecf_docker_compose_micro/mysql-db/)
 [server](./ECF/ECF/ecf_docker_compose_micro/server/)
