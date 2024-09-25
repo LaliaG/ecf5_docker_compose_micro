@@ -150,6 +150,10 @@ services:
     build: 
       context: ./client/
       dockerfile: Dockerfile
+      args:
+        REACT_APP_AUTHENTICATION_SERVICE_URL: "http://localhost:7000"
+        REACT_APP_COMMON_DATA_SERVICE_URL: "http://localhost:9000"
+        REACT_APP_SEARCH_SUGGESTION_SERVICE_URL: "http://localhost:10000"  
 
     expose:
       - ${REACT_APP_PORT}

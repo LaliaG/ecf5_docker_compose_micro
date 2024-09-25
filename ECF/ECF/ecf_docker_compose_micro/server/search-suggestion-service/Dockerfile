@@ -21,10 +21,10 @@ FROM openjdk:11-jdk-slim
 WORKDIR /app
 
 # Copy the jar from the build step (Assume you will build the jar file with Maven/Gradle, in the pom file Maven is used) 
-COPY --from=builder /app/target/search-suggestion-service-0.0.1-SNAPSHOT.jar .
+COPY --from=builder /app/target/search-suggestion-service-.jar .
 
 # Expose the port (use 10000 as specified in .env)
 EXPOSE 10000
 
 # Run the Spring Boot application
-ENTRYPOINT ["java","-jar","search-suggestion-service-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java","-jar","search-suggestion-service.jar"]

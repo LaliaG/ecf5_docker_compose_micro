@@ -20,10 +20,10 @@ FROM openjdk:11-jdk-slim
 WORKDIR /app
 
 # Copy the jar from the build step (Assume you will build the jar file with Maven/Gradle, in the pom file Maven is used) 
-COPY --from=builder /app/target/payment-service-0.0.1-SNAPSHOT.jar .
+COPY --from=builder /app/target/payment-service.jar .
 
 # Expose the port (use 9050 as specified in .env)
 EXPOSE 9050
 
 # Run the Spring Boot application
-ENTRYPOINT ["java","-jar","payment-service-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java","-jar","payment-service-0.0.1.jar"]
