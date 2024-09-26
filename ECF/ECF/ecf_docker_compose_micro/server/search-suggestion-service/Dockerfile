@@ -21,7 +21,7 @@ FROM openjdk:11-jdk-slim
 WORKDIR /app
 
 # Copy the jar from the build step (Assume you will build the jar file with Maven/Gradle, in the pom file Maven is used) 
-COPY --from=builder /app/target/search-suggestion-service-.jar .
+COPY --from=builder /app/target/search-suggestion-service.jar .
 
 # Expose the port (use 10000 as specified in .env)
 EXPOSE 10000

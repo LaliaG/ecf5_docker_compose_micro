@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.ut.ecommerce</groupId>
 	<artifactId>search-suggestion-service</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version></version>
 	<name>search-suggestion-service</name>
 	<description>search-suggestion-service microservice</description>
 

@@ -10,7 +10,8 @@
 	</parent>
 	<groupId>com.ut.ecommerce</groupId>
 	<artifactId>payment-service</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>
+	</version>
 	<name>payment-service</name>
 	<description>payment-service Microservices</description>
 

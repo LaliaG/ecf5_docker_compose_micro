@@ -26,4 +26,4 @@ COPY --from=builder /app/target/payment-service.jar .
 EXPOSE 9050
 
 # Run the Spring Boot application
-ENTRYPOINT ["java","-jar","payment-service-0.0.1.jar"]
+ENTRYPOINT ["java","-jar","payment-service.jar"]

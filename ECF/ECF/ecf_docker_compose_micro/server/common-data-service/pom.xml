@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.ut.ecommerce</groupId>
 	<artifactId>common-data-service</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version></version>
 	<name>common-data-service</name>
 	<description>common-data-service microservice</description>
 
